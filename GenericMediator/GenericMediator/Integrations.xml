@@ -1,0 +1,4 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ArrayOfIntegration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Integration IsActive="True" Code="MediatorCode" ContentType="text/xml" ApiAddress="https://hostname:port" Param="TEST"  Timeout="300000" Auth="True" AuthType="Basic" Username="sys" Password="sys" />
+</ArrayOfIntegration>
