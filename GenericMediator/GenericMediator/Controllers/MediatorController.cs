@@ -13,6 +13,8 @@ using System.Net.Http.Headers;
 using Microsoft.Web.Infrastructure.DynamicValidationHelper;
 using System.Collections.Specialized;
 using GenericMediator.Globals;
+using clsPinGeneratorComponent;
+using clsPinGeneratorComponent_Ecal;
 
 namespace GenericMediator.Controllers
 {
@@ -123,8 +125,88 @@ namespace GenericMediator.Controllers
             return null;
             #endregion
         }
+
+        /// <summary>
+        /// This GET Resource is specifically for Pin Generator
+        /// </summary>
+        /// <param name="TokenNo"></param>
+        /// <param name="WorkOrderNo"></param>
+        /// <param name="PadSerialNo"></param>
+        /// <param name="FSEPwd"></param>
+        /// <returns></returns>
+        [System.Web.Http.AllowAnonymous]
+        [System.Web.Http.HttpGet]
+        [System.Web.Http.ActionName("PinGenerator")]
+        [ValidateInput(false)]
+        public HttpResponseMessage PinGenerator(string TokenNo = null, string WorkOrderNo = null, string PadSerialNo = null, string FSEPwd = null)
+        {
+            #region Local Variables
+            string ret = "";
+            string returnMessage = "";
+            string sToken = TokenNo;
+            string sWorkOrderNo = WorkOrderNo;
+            string sPadSerialNo = PadSerialNo;
+            string sFSEPwd = FSEPwd;
+            string sDynamicPin = "";
+            byte bRetStatus = new byte();
+            byte bSchemaNo = new byte();
+            #endregion
+
+            #region Action
+            try
+            {
+                ret = PinGenerator(sToken, sWorkOrderNo, sPadSerialNo, sFSEPwd, ref sDynamicPin, ref bRetStatus, ref bSchemaNo);
+                returnMessage = "STATUS_CODE" + Convert.ToChar(31) + bRetStatus.ToString() + Convert.ToChar(30) + "STATUS_MESSAGE" + Convert.ToChar(31) + ret + Convert.ToChar(30) + "PIN" + Convert.ToChar(31) + sDynamicPin + Convert.ToChar(30);
+                byte[] byteArray = Encoding.ASCII.GetBytes(returnMessage);
+                MemoryStream stream = new MemoryStream(byteArray);
+                HttpResponseMessage response = new HttpResponseMessage(oK);
+                response.Content = new StreamContent(stream);
+                response.StatusCode = oK;
+                response.Content.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
+                return response;
+            }
+            catch (Exception e)
+            {
+                byte[] byteArray = Encoding.ASCII.GetBytes(e.Message);
+                MemoryStream stream = new MemoryStream(byteArray);
+                HttpResponseMessage response = new HttpResponseMessage(oK);
+                response.Content = new StreamContent(stream);
+                response.StatusCode = iSE;
+                response.Content.Headers.ContentType = new MediaTypeHeaderValue("text/plain");
+                return response;
+            }
+            #endregion
+        }
+
+
         #endregion
 
+        #region Methods
+        public string PinGenerator(string sToken, string sWorkOrderNo, string sPadSerialNo, string sFSEPwd, ref string sDynamicPin, ref byte bRetStatus, ref byte bSchemaNo)
+        {
+            #region Local Variables
+            string ret = "";
+            #endregion
+
+            #region Action
+            Class1 PinGeneratorObject = new Class1();
+            Ecal PinGeneratorObject_Ecal = new Ecal();
+            if (sToken.Length == 18)
+            {
+                ret = PinGeneratorObject.fnGeneratePinforToken(sToken, sWorkOrderNo, sPadSerialNo, sFSEPwd, ref sDynamicPin, ref bRetStatus, ref bSchemaNo);
+            }
+            else if (sToken.Length == 20)
+            {
+                ret = PinGeneratorObject_Ecal.fnGeneratePinForDynamicOTP(sToken, sWorkOrderNo, sPadSerialNo, sFSEPwd, ref sDynamicPin, ref bRetStatus, ref bSchemaNo);
+            }
+            else
+            {
+                ret = "Token Length Mismatch";
+            }
+            return ret;
+            #endregion
+        }
+        #endregion
 
     }
 }
