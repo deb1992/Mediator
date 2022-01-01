@@ -56,8 +56,10 @@ namespace GenericMediator.Controllers
                         httpRequest.ContentType = item.ContentType;
                         httpRequest.ContentLength = 0;
                         httpRequest.Timeout = item.Timeout;
-                        if (item.SOAPAction != "")
+                        if (item.SOAPAction != null)
+                        {
                             httpRequest.Headers.Add("SOAPAction", item.SOAPAction);
+                        }
                         if (item.Auth == "True")
                         {
                             if (item.AuthType == "Basic")
@@ -71,8 +73,17 @@ namespace GenericMediator.Controllers
                             {
                                 httpRequest.Headers.Add("Authorization", $"Bearer {item.AuthToken}");
                             }
+                            if (item.AuthType == "Apikey")
+                            {
+                                httpRequest.Headers.Add("Apikey", item.Apikey);
+                                if (item.XApiAccesskey != null)
+                                {
+                                    httpRequest.Headers.Add("X-Api-Accesskey", item.XApiAccesskey);
+                                }
+                            }
                         }
-                        if ((item.Param != "") && (HttpContext.Current.Request.HttpMethod == "POST"))
+                        
+                        if ((item.Param != null) && (HttpContext.Current.Request.HttpMethod == "POST"))
                         {
                             Func<NameValueCollection> formGetter;
                             Func<NameValueCollection> queryStringGetter;
@@ -90,7 +101,7 @@ namespace GenericMediator.Controllers
                         HttpWebResponse httpResponse = (HttpWebResponse)httpRequest.GetResponse();
                         response.Content = new StreamContent(httpResponse.GetResponseStream());
                         response.StatusCode = httpResponse.StatusCode;
-                        if (httpResponse.ContentType.IndexOf(";").Equals(0))
+                        if (httpResponse.ContentType.IndexOf(";") == -1)
                         {
                             response.Content.Headers.ContentType = new MediaTypeHeaderValue(httpResponse.ContentType);
                         }

@@ -35,6 +35,10 @@ namespace GenericMediator.Globals
         public string Password { get; set; }
         [XmlAttribute]
         public string SOAPAction { get; set; }
+        [XmlAttribute]
+        public string Apikey { get; set; }
+        [XmlAttribute]
+        public string XApiAccesskey { get; set; }
         #endregion
     }
 }
